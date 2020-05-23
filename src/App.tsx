@@ -1,7 +1,12 @@
 import React from 'react';
 
-function App() {
-  return <h1>Hello World!</h1>;
-}
+import Routes from './routes';
+import { BrowserRouter } from 'react-router-dom';
+
+const App: React.FunctionComponent = () => (
+  <BrowserRouter>
+    <Routes />
+  </BrowserRouter>
+);
 
 export default App;
