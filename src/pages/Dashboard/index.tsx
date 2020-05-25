@@ -4,7 +4,7 @@ import api from '../../services/api';
 
 import logoImg from '../../assets/logo.svg';
 
-import { Title, Form, Repositories } from './styles';
+import { Title, Form, Repositories, Error } from './styles';
 
 interface Repository {
   full_name: string;
@@ -16,6 +16,7 @@ interface Repository {
 }
 const Dashboard: React.FunctionComponent = () => {
   const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [inputError, setInputError] = useState('');
   const [newRepository, setNewRepository] = useState('');
 
   async function handleAddRepository(
@@ -23,27 +24,40 @@ const Dashboard: React.FunctionComponent = () => {
   ): Promise<void> {
     event.preventDefault();
 
-    const response = await api.get<Repository>(`repos/${newRepository}`);
+    if (!newRepository) {
+      setInputError('Digite o autor/nome do repositório!');
+      return;
+    }
 
-    const repository = response.data;
+    try {
+      const response = await api.get<Repository>(`repos/${newRepository}`);
 
-    setRepositories([...repositories, repository]);
+      const repository = response.data;
 
-    setNewRepository('');
+      setRepositories([...repositories, repository]);
+
+      setNewRepository('');
+      setInputError('');
+    } catch (err) {
+      setInputError('Esse repositório não existe!');
+    }
   }
 
   return (
     <>
       <img src={logoImg} alt="GitHub Explorer" />
       <Title>Explore repositórios no GitHub</Title>
-      <Form onSubmit={handleAddRepository}>
+      <Form hasError={!!inputError} onSubmit={handleAddRepository}>
         <input
           value={newRepository}
           onChange={(e) => setNewRepository(e.target.value)}
-          placeholder="Nome do repositório"
+          placeholder="Autor/Nome do repositório"
         />
         <button type="submit">Pesquisar</button>
       </Form>
+
+      {inputError && <Error>{inputError}</Error>}
+
       <Repositories>
         {repositories.map((repository) => (
           <a key={repository.full_name} href="teste">
